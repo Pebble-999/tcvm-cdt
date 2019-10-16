@@ -358,7 +358,7 @@ public:
 class TCBaseContract : boost::noncopyable {
 public:
     void Init(){}
-    void Callback(){}
+    void Fallback(){}
 };
 
 template<typename T, typename Q, typename R, typename... Args>
@@ -486,16 +486,17 @@ void delegate_call_contract(const char* action, T& con, void (T::*func)(Args...)
 extern "C"{\
     const char* thunderchain_main(const char* method, const char* arg){ \
             TYPE contract;\
+	     if(strcmp(method, "")==0 && strcmp(arg, "")==0){\
+                contract.Fallback();\
+		return 0;\
+            }\
             if(strcmp(method, "Init")==0 || strcmp(method, "init")==0){\
                 contract.Init();\
             }\
             TC_API(TYPE, MEMBERS)\
-            else if(strcmp(method, "Callback")==0 || strcmp(method, "callback")==0){\
-                contract.Callback();\
-            }\
-			else{\
-			TC_RequireWithMsg(false, "Unknown Methods");\
-			}\
+	    else{\
+	    TC_RequireWithMsg(false, "Unknown Methods");\
+	    }\
             return 0;\
     }\
 }
